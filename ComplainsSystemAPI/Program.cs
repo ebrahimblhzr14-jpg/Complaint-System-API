@@ -261,10 +261,13 @@ builder.Services.AddCors(options =>
         policy
             .WithOrigins(
                "https://localhost:7208", 
-               "http://localhost:5199"
+               "http://localhost:5199",
+               "http://localhost:4200",
+               "https://localhost:4200"
             )
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -281,9 +284,9 @@ builder.Services.AddRateLimiter(options =>
             partitionKey: ip,
             factory: _ => new FixedWindowRateLimiterOptions
             {
-                PermitLimit = 5,
-                Window = TimeSpan.FromMinutes(2),
-                QueueLimit = 0
+                PermitLimit = 100,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 10
             });
     });
 
@@ -437,6 +440,8 @@ app.UseHttpsRedirection();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
+app.UseStaticFiles();
+
 app.UseCors("CorsPolicy");
 app.UseRouting();
 
@@ -446,6 +451,5 @@ app.UseRateLimiter();
 
 
 app.MapControllers();
-app.UseStaticFiles(); // ����� ���� ����� ������� �� wwwroot
 
 app.Run();
